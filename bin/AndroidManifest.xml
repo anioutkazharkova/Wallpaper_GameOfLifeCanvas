@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.anioutkazharkova.gameoflifecanvas"
+    package="com.anioutkazharkova.lifewallpaper"
     android:versionCode="1"
     android:versionName="1.0" >
 
@@ -18,8 +18,8 @@
                 <action android:name="android.service.wallpaper.WallpaperService" />
             </intent-filter>
             <meta-data android:name="android.service.wallpaper" android:resource="@xml/wallpaper"/></service>
-        <activity android:name=".SettingsActivity" label="@string/action_settings" android:configChanges="keyboardHidden|orientation"
-        android:exported="true"></activity>
+        <activity android:name="SettingsActivity" android:configChanges="keyboardHidden|orientation"
+        android:exported="true" android:label="@string/action_settings"></activity>
     </application>
 
 </manifest>
