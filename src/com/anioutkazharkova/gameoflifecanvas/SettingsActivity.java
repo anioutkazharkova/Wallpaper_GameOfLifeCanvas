@@ -1,6 +1,12 @@
 package com.anioutkazharkova.gameoflifecanvas;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
+import android.app.Dialog;
+import android.app.DialogFragment;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
@@ -11,6 +17,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
@@ -23,14 +32,19 @@ public class SettingsActivity extends Activity {
 	private Spinner spBacks;
 	private EditText etCells;
 	private SeekBar sbCellSize;
-	private TextView tvCellsNumber;
+	private TextView tvCellsNumber,tvMax;
+	//private CheckBox chbForm;
 	
-	int backColor=0;
-	int themeCode=0;
-	int cellsNumber=200;
-	int newCellsNumber=200;
-	int cellSize=20;
+	int backColor=Utility.BackColor;
+	int themeCode=Utility.ThemeCode;
+	int cellsNumber=Utility.CellsNumber;
+	int newCellsNumber=Utility.CellsNumber;
+	int cellSize=Utility.CellSize;
 	private SharedPreferences preferences;
+	private int columns=0;
+	private int rows=0;
+	int maxCount=0;
+	int form=Utility.Form;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -40,8 +54,30 @@ public class SettingsActivity extends Activity {
 		
 		preferences = getApplicationContext().getSharedPreferences(Utility.PREFERENCES,
 				getApplicationContext().MODE_PRIVATE);
-		loadPreferences();
+		//loadPreferences();
 		
+		
+		maxCount=getMaxCount();
+		/*chbForm=(CheckBox)findViewById(R.id.chbForm);
+		if (form==0)
+			chbForm.setChecked(false);
+		else 
+			chbForm.setChecked(true);
+		
+		chbForm.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				// TODO Auto-generated method stub
+				if (isChecked)
+					form=1;
+				else
+					form=0;
+			}
+		});
+		*/
+		tvMax=(TextView)findViewById(R.id.tvMaxNumber);
+		tvMax.setText("Max: "+maxCount);
 		spThemes = (Spinner) findViewById(R.id.spThemes);
 		spBacks= (Spinner) findViewById(R.id.spBackground);
 		etCells=(EditText)findViewById(R.id.etCellNumber);
@@ -74,6 +110,9 @@ public class SettingsActivity extends Activity {
 				}
 				else 
 					sbCellSize.setProgress(2);
+				
+				maxCount=getMaxCount();
+				tvMax.setText("Max: "+maxCount);
 			}
 		});
 		
@@ -92,6 +131,13 @@ public class SettingsActivity extends Activity {
 					catch(Exception e)
 					{
 						
+					}
+					if (newCellsNumber>maxCount)
+					{
+						newCellsNumber=maxCount-1;
+						//etCells.setText(newCellsNumber);
+						//ErrorDialog dialog=new ErrorDialog();
+						//dialog.show(getFragmentManager(), "error");
 					}
 				}
 			}
@@ -155,6 +201,35 @@ public class SettingsActivity extends Activity {
 		spThemes.setSelection(themeCode);
 	}
 	
+	
+	class ErrorDialog extends DialogFragment
+	{
+		@Override
+		public Dialog onCreateDialog(Bundle savedInstanceState) {
+			// TODO Auto-generated method stub
+			
+			AlertDialog.Builder builder=new Builder(getApplicationContext());
+			
+			builder.setMessage("Max: "+maxCount);
+			builder.setPositiveButton("OK", new OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					// TODO Auto-generated method stub
+					dismiss();
+				}
+			});
+			
+			return builder.create();
+		}
+	}
+	
+	private int getMaxCount()
+	{
+		columns = Utility.getDisplayWidth(this) /cellSize;
+		rows = Utility.getDisplayHeight(this) / cellSize;
+		return rows*columns;
+	}
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// TODO Auto-generated method stub
@@ -174,6 +249,12 @@ public class SettingsActivity extends Activity {
 		Editor editor =preferences.edit();
 		editor.putInt(Utility.BACK_PREF, backColor);
 		editor.putInt(Utility.THEME_PREF, themeCode);
+		Utility.ThemeCode=themeCode;
+		Utility.CurrentTheme=new Theme(themeCode);
+		Utility.BackColor=backColor;
+		Utility.CellsNumber=newCellsNumber;
+		Utility.CellSize=cellSize;
+		Utility.Form=form;
 		editor.putInt(Utility.CELL_PREF, newCellsNumber);
 		editor.putInt(Utility.SIZE_PREF, cellSize);
 		editor.apply();

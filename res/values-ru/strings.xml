@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Life wallpaper</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Настройки</string>
+    <string name="wallpaper">Интерактивный симулятор "Жизни"</string>
+    <string name="life_settings">Настройки Жизни</string>
+    <string name="cells_number">Число клеток</string>
+    <string name="cells_size">Размер клетки</string>
+    <string name="theme_settings">Настройки темы</string>
+    <string name="background">Фон</string>
+    <string name="theme">Тема</string>
+    <string name="save">Сохранить</string>
+    <string name="cell_form">Круглая клетка</string>
+    
+    <string-array name="theme_colors">
+        <item>Orange</item>
+        <item>Red</item>
+        <item>Blue</item>
+        <item>Green</item>
+        <item>Multicolor</item>
+    </string-array>
+
+</resources>

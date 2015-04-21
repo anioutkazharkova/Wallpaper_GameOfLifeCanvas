@@ -5,7 +5,12 @@ import android.util.DisplayMetrics;
 
 public class Utility {
 	
-	public static Theme CurrentTheme=new Theme(4);
+	public static Theme CurrentTheme=new Theme(0);
+	public static int ThemeCode=0;
+	public static int BackColor=0;
+	public static int Form=0;
+	public static int CellsNumber=500;
+	public static int CellSize=20;
 	public static String PREFERENCES="GameLifePref";
 	public static String BACK_PREF="backColor_pref";
 	public static String THEME_PREF="themeCode_pref";

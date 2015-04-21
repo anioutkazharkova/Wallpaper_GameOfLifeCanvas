@@ -4,19 +4,19 @@ import java.util.Random;
 
 public class LifeModel
 {
-    // состояния клетки
-    private static final Byte CELL_ALIVE = 1; // клетка жива
-    private static final Byte CELL_DEAD = 0; // клетки нет
+    // Cell's status
+    private static final Byte CELL_ALIVE = 1; 
+    private static final Byte CELL_DEAD = 0; 
     
-    // константы для количества соседей
-    private static final Byte NEIGHBOURS_MIN = 2; // минимальное число соседей для живой клетки
-    private static final Byte NEIGHBOURS_MAX = 3; // максимальное число соседей для живой клетки
-    private static final Byte NEIGHBOURS_BORN = 3; // необходимое число соседей для рождения клетки
+    //Neighbours variables
+    private static final Byte NEIGHBOURS_MIN = 2;
+    private static final Byte NEIGHBOURS_MAX = 3; 
+    private static final Byte NEIGHBOURS_BORN = 3; 
     
-    private static int mCols; // количество столбцов на карте
-    private static int mRows; // количество строк на карте
-    private Byte[][] mCells; // расположение очередного поколения на карте. 
-                            //Каждая ячейка может содержать либо CELL_ACTIVE, либо CELL_DEAD
+    private static int mCols; // Columns
+    private static int mRows; // Rows
+    private Byte[][] mCells; // Cells massive
+                           
     
     int alives=0;
     int dead=0;
@@ -32,8 +32,8 @@ public class LifeModel
     }
     
     /**
-     * Инициализация первого поколения случайным образом
-     * @param cellsNumber количество клеток в первом поколении
+     * Initialize first generation random
+     * @param cellsNumber numbers of cells in first generation
      */
     private void initValues(int cellsNumber)
     {
@@ -57,7 +57,7 @@ public class LifeModel
     }
     
     /**
-     * Переход к следующему поколению
+     * Creating next generation
      */
     public void next()
     {
@@ -65,11 +65,11 @@ public class LifeModel
     	dead=0;
         Byte[][] tmp = new Byte[mRows][mCols];
         
-        // цикл по всем клеткам
+        
         for (int i = 0; i < mRows; ++i)
             for (int j = 0; j < mCols; ++j)
             {
-                // вычисляем количество соседей для каждой клетки
+                //Count neighbours number for every cell
                 int n = 
                     itemAt(i-1, j-1) + itemAt(i-1, j) + itemAt(i-1, j+1) +
                     itemAt(i, j-1) + itemAt(i, j+1) +
@@ -78,7 +78,7 @@ public class LifeModel
                 tmp[i][j] = mCells[i][j];
                 if (isCellAlive(i, j))
                 {
-                    // если клетка жива, а соседей у нее недостаточно или слишком много, клетка умирает
+                    // kill cell, if there are too little or too much neighbours
                     if (n < NEIGHBOURS_MIN || n > NEIGHBOURS_MAX)
                         {tmp[i][j] = CELL_DEAD;
                         dead+=1;
@@ -86,7 +86,7 @@ public class LifeModel
                 }
                 else
                 {
-                    // если у пустой клетки ровно столько соседей, сколько нужно, она оживает 
+                    // cell alive, if it is enough neighbours 
                     if (n == NEIGHBOURS_BORN)
                         {tmp[i][j] = CELL_ALIVE;    
                         alives+=1;
@@ -101,7 +101,7 @@ public class LifeModel
     }
     
     /**
-     * @return Размер поля
+     * @return Max cells number
      */
     public int getCount()
     {
@@ -109,9 +109,9 @@ public class LifeModel
     }
     
     /**
-     * @param row Номер строки
-     * @param col Номер столбца
-     * @return Значение ячейки, находящейся в указанной строке и указанном столбце
+     * @param row Row number
+     * @param col Column number
+     * @return Cell value
      */
     private Byte itemAt(int row, int col)
     {
@@ -128,19 +128,16 @@ public class LifeModel
     }
     
     /**
-     * @param row Номер строки
-     * @param col Номер столбца
-     * @return Жива ли клетка, находящаяся в указанной строке и указанном столбце
+     * @param row Row number
+     * @param col Column number
+     * @return Check, if cell is alive
      */
     public Boolean isCellAlive(int row, int col)
     {
         return itemAt(row, col) == CELL_ALIVE;
     }
 
-    /**
-     * @param position Позиция (для клетки [row, col], вычисляется как row * mCols + col)
-     * @return Жива ли клетка, находящаяся в указанной позиции
-     */
+   //Check if cell is alive
     public Boolean isCellAlive(int position)
     {
         int r = position / mCols;
@@ -148,11 +145,13 @@ public class LifeModel
 
         return isCellAlive(r,c);
     }
+    
+    //Change cell status to opposite
     public void changeAlive(int position)
     {
     	 int r = position / mCols;
          int c = position % mCols;
          mCells[r][c]=((itemAt(r,c)==CELL_ALIVE)?CELL_DEAD:CELL_ALIVE);
-        // return itemAt(r, c) == CELL_ALIVE;
+        
     }
 }

@@ -28,8 +28,8 @@ public class LifeWallpaperService extends WallpaperService {
 	class LifeEngine extends Engine {
 		private int rows;
 		private int columns;
-		private int cells = 300;
-		private int size = 20; // Width and height of cell
+		private int cells = Utility.CellsNumber;
+		private int size = Utility.CellSize; // Width and height of cell
 		private LifeModel mLifeModel = null;
 		private int divider = 1;
 
@@ -85,23 +85,26 @@ public class LifeWallpaperService extends WallpaperService {
 			handler.removeCallbacks(drawrunnable);
 
 			try {
-				canvas = holder.lockCanvas(null);
+				try {
+					canvas = holder.lockCanvas(null);
+				} catch (Exception e) {
+
+				}
 				if (null == canvas) {
 					return;
 				}
+				System.gc();
 				synchronized (holder) {
 					drawPattern(canvas);
 				}
 
 			} finally {
 				if (canvas != null)
-					try{
-					holder.unlockCanvasAndPost(canvas);
+					try {
+						holder.unlockCanvasAndPost(canvas);
+					} catch (Exception e) {
+
 					}
-				catch(Exception e)
-				{
-					
-				}
 			}
 
 			handler.removeCallbacks(drawrunnable);
@@ -118,15 +121,22 @@ public class LifeWallpaperService extends WallpaperService {
 			isVisible = visible;
 
 			if (visible) {
-				 loadPreferences();
-				 reset(mContext);
-
+				// loadPreferences();
+				reset(mContext);
+				// init(mContext);
+				setColors();
+				setDeadColor();
 				synchronized (sync) {
-
+					DrawThread thread = new DrawThread(getSurfaceHolder(),
+							mContext, mLifeModel, new Object[] { backColor,
+									rows, columns, size, colors, mAlivePaint,
+									mDeadPaint });
+					thread.start();
 					// mLifeModel = new LifeModel(rows, columns, cells);
-					handler.post(drawrunnable);
-					startLive();
+					// handler.post(drawrunnable);
+
 				}
+				startLive();
 			} else {
 				handler.removeCallbacks(drawrunnable);
 			}
@@ -138,7 +148,10 @@ public class LifeWallpaperService extends WallpaperService {
 			if (canvas != null) {
 				Paint paint = null;
 				Paint stroke = null;
-				canvas.drawColor(mContext.getResources().getColor(backColor));
+
+				canvas.drawColor(mContext.getResources().getColor(
+						Utility.BackColor == 0 ? R.color.smockie
+								: R.color.black));
 				for (int i = 0; i < rows; i++) {
 					for (int j = 0; j < columns; j++) {
 						if (mLifeModel.isCellAlive(i, j)) {
@@ -149,6 +162,12 @@ public class LifeWallpaperService extends WallpaperService {
 									colors[color]));
 							stroke = mStrokePaint;
 						} else {
+							mDeadPaint
+									.setColor(mContext
+											.getResources()
+											.getColor(
+													Utility.BackColor == 0 ? R.color.smockie
+															: R.color.black));
 							paint = mDeadPaint;
 							stroke = null;
 						}
@@ -156,7 +175,7 @@ public class LifeWallpaperService extends WallpaperService {
 						int y = (int) Math.round(j * size) + divider;
 						int x1 = x + size - divider;
 						int y1 = y + size - divider;
-						if (Theme.getForm() == 0) {
+						if (Utility.Form == 0) {
 							Rect r = new Rect(x, y, x1, y1);
 							canvas.drawRect(r, paint);
 						} else {
@@ -223,7 +242,11 @@ public class LifeWallpaperService extends WallpaperService {
 		}
 
 		public void next() {
-			mLifeModel.next();
+			try {
+				mLifeModel.next();
+			} catch (Exception e) {
+
+			}
 			draw();
 		}
 
@@ -252,47 +275,45 @@ public class LifeWallpaperService extends WallpaperService {
 			colors = Utility.CurrentTheme.getColors();
 		}
 
-		public void reset(Context context)
-		{
+		public void reset(Context context) {
+			size = Utility.CellSize;
+			cells = Utility.CellsNumber;
 			columns = Utility.getDisplayWidth(context) / size;
 			rows = Utility.getDisplayHeight(context) / size;
-			size = Utility.DpToPx(context, size);
-			divider = Utility.DpToPx(context, 1);
+			size = Utility.DpToPx(context, Utility.CellSize);
 			mLifeModel = new LifeModel(rows, columns, cells);
-			setDeadColor();
+
 		}
+
 		public void init(Context context) {
 
 			mContext = context;
-			loadPreferences();
+			// loadPreferences();
 			columns = Utility.getDisplayWidth(context) / size;
 			rows = Utility.getDisplayHeight(context) / size;
 			size = Utility.DpToPx(context, size);
 			divider = Utility.DpToPx(context, 1);
 			mLifeModel = new LifeModel(rows, columns, cells);
-			if (mAlivePaint == null) {
-				mAlivePaint = new Paint();
-				mAlivePaint.setStyle(Style.FILL);
-				mAlivePaint.setAntiAlias(true);
-			}
 
-			if (mDeadPaint == null) {
-				mDeadPaint = new Paint();
-				mDeadPaint.setStyle(Style.FILL_AND_STROKE);
-				
-				mDeadPaint.setAntiAlias(true);
-			}
-			mDeadPaint
-			.setColor(mContext.getResources().getColor(backColor));
+			mAlivePaint = new Paint();
+			mAlivePaint.setStyle(Style.FILL);
+			mAlivePaint.setAntiAlias(true);
+
+			mDeadPaint = new Paint();
+			mDeadPaint.setStyle(Style.FILL_AND_STROKE);
+			mDeadPaint.setColor(mContext.getResources().getColor(
+					Utility.BackColor == 0 ? R.color.smockie : R.color.black));
+			mDeadPaint.setAntiAlias(true);
+
+			//mDeadPaint.setColor(mContext.getResources().getColor(backColor));
 			setColors();
 		}
 
-		private synchronized void setDeadColor()
-		{
-			mDeadPaint
-			.setColor(mContext.getResources().getColor(backColor));
-			
+		private synchronized void setDeadColor() {
+			mDeadPaint.setColor(mContext.getResources().getColor(Utility.BackColor==0?R.color.smockie:R.color.black));
+
 		}
+
 		@Override
 		public void onCreate(SurfaceHolder surfaceHolder) {
 			super.onCreate(surfaceHolder);
@@ -331,12 +352,10 @@ public class LifeWallpaperService extends WallpaperService {
 			 * loadPreferences(); synchronized (sync) { init(mContext); }
 			 */
 
-			synchronized (sync) {
+			// mLifeModel = new LifeModel(rows, columns, cells);
+			handler.post(drawrunnable);
+			startLive();
 
-				// mLifeModel = new LifeModel(rows, columns, cells);
-				handler.post(drawrunnable);
-				startLive();
-			}
 		}
 
 		@Override
@@ -345,7 +364,7 @@ public class LifeWallpaperService extends WallpaperService {
 			super.onSurfaceDestroyed(holder);
 			stopLive();
 			isVisible = false;
-			
+
 			handler.removeCallbacks(drawrunnable);
 
 		}
